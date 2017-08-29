@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "vec.h"
+#include "mat.h"
 #include "MatFactory.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -17,7 +19,7 @@ namespace UnitTests
 
 		TEST_METHOD(MatFactoryCreateZeroMat3)
 		{
-			mat3 m = MatFactory::createZeroMat3();
+			mat3 m = MatFactory::ZeroMat3();
 
 			mat3 e = mat3(
 				0.0f, 0.0f, 0.0f,
@@ -28,7 +30,7 @@ namespace UnitTests
 
 		TEST_METHOD(MatFactoryCreateIdentityMat3)
 		{
-			mat3 m = MatFactory::createIdentityMat3();
+			mat3 m = MatFactory::IdentityMat3();
 
 			mat3 e = mat3(
 				1.0f, 0.0f, 0.0f,
@@ -40,7 +42,7 @@ namespace UnitTests
 		TEST_METHOD(MatFactoryCreateDualMat3)
 		{
 			vec3 v = vec3(1.0f, 2.0f, 3.0f);
-			mat3 m = MatFactory::createDualMat3(v);
+			mat3 m = MatFactory::DualMat3(v);
 
 			mat3 e = mat3(
 				0.0f, -3.0f, 2.0f,
@@ -51,7 +53,7 @@ namespace UnitTests
 
 		TEST_METHOD(MatFactoryCreateZeroMat4)
 		{
-			mat4 m = MatFactory::createZeroMat4();
+			mat4 m = MatFactory::ZeroMat4();
 
 			mat4 e = mat4(
 				0.0f, 0.0f, 0.0f, 0.0f,
@@ -63,7 +65,7 @@ namespace UnitTests
 
 		TEST_METHOD(MatFactoryCreateIdentityMat4)
 		{
-			mat4 m = MatFactory::createIdentityMat4();
+			mat4 m = MatFactory::IdentityMat4();
 
 			mat4 e = mat4(
 				1.0f, 0.0f, 0.0f, 0.0f,
@@ -80,7 +82,7 @@ namespace UnitTests
 				3.0f, 0.0f, -1.0f,
 				-2.0f, 1.0f, 0.0f);
 
-			mat4 m = MatFactory::createMat4FromMat3(m3);
+			mat4 m = MatFactory::Mat4FromMat3(m3);
 
 			mat4 e = mat4(
 				0.0f, -3.0f, 2.0f, 0.0f,
@@ -103,7 +105,7 @@ namespace UnitTests
 				3.0f, 0.0f, -1.0f,
 				-2.0f, 1.0f, 0.0f);
 
-			mat3 m = MatFactory::createMat3FromMat4(m4);
+			mat3 m = MatFactory::Mat3FromMat4(m4);
 
 			
 			Assert::IsTrue(e == m);
@@ -117,7 +119,7 @@ namespace UnitTests
 				0.0f, 0.0f, 8.0f, 0.0f,
 				0.0f, 0.0f, 0.0f, 1.0f);
 
-			mat4 m = MatFactory::createScaleMat4(vec3(10.0f, 9.0f, 8.0f));
+			mat4 m = MatFactory::ScaleMat4(vec3(10.0f, 9.0f, 8.0f));
 
 			Assert::IsTrue(e == m);
 		}
@@ -130,7 +132,7 @@ namespace UnitTests
 				0.0f, 0.0f, 1.0f, 8.0f,
 				0.0f, 0.0f, 0.0f, 1.0f);
 
-			mat4 m = MatFactory::createTranslationMat4(vec3(10.0f, 9.0f, 8.0f));
+			mat4 m = MatFactory::TranslationMat4(vec3(10.0f, 9.0f, 8.0f));
 
 			Assert::IsTrue(e == m);
 		}
@@ -144,7 +146,7 @@ namespace UnitTests
 				-0.58f, -0.58f, -0.58f, -8.7f,
 				0.0f, 0.0f, 0.0f, 1.0f);
 
-			mat4 m = MatFactory::createViewMatrix(vec3(-5.0f, -5.0f, -5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+			mat4 m = MatFactory::ViewMatrix(vec3(-5.0f, -5.0f, -5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 
 			
 			/*Assert::AreEqual(e.data[0], m.data[0]);
@@ -175,7 +177,7 @@ namespace UnitTests
 				0.0f, 0.0f, -0.22f, -1.22f,
 				0.0f, 0.0f, 0.0f, 1.0f);
 
-			mat4 m = MatFactory::createOrthographicProjectionMatrix(-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f);
+			mat4 m = MatFactory::OrthographicProjectionMatrix(-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f);
 
 			Assert::AreEqual(e.data[0], m.data[0]);
 			Assert::AreEqual(e.data[1], m.data[1]);
@@ -205,7 +207,7 @@ namespace UnitTests
 				0.0f, 0.0f, -1.22f, -2.22f,
 				0.0f, 0.0f, -1.0f, 0.0f);
 
-			mat4 m = MatFactory::createPerspectiveProjectionMatrix(0.524f /*30 degrees*/, 640.0f / 480.0f, 1.0f, 10.0f);
+			mat4 m = MatFactory::PerspectiveProjectionMatrix(0.524f /*30 degrees*/, 640.0f / 480.0f, 1.0f, 10.0f);
 
 			Assert::AreEqual(e.data[0], m.data[0]);
 			Assert::AreEqual(e.data[1], m.data[1]);

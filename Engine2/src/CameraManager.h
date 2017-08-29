@@ -4,12 +4,15 @@
 
 #include "GL\glew.h"
 #include "GL\freeglut.h"
-#include "Camera.h"
-#include "ShaderManager.h"
-#include "Constant.h"
+
+#include "vec.h"
+#include "mat.h"
+#include "qtrn.h"
 
 namespace Engine2
 {
+	class ShaderManager;
+	class Camera;
 
 	class CameraManager
 	{
@@ -19,9 +22,7 @@ namespace Engine2
 		const vec3 Y_AXIS = vec3(0.0f, 1.0f, 0.0f);
 
 		Camera * camera;
-		ShaderManager * _shaderManager;
 
-		GLuint _VaoId;
 		bool ortho, gimbal;
 		float screenWidth, screenHeight;
 		mat4 r;
@@ -35,7 +36,7 @@ namespace Engine2
 
 	public:
 		CameraManager();
-		void init(ShaderManager * shaderManager, GLuint VaoId);
+		void init(GLuint Ubo);
 		void computeMatrix();
 		void changeCamera();
 		void changeRotation();
@@ -44,7 +45,7 @@ namespace Engine2
 		void mouseMotion(int xx, int yy);
 		void mouseWheel(int wheel, int direction, int x, int y);
 		void reshape(int w, int h);
-		
+		Camera * getCamera();
 	};
 }
 #endif

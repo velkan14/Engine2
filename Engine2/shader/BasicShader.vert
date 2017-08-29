@@ -11,8 +11,13 @@ out vec3 exColor;
 
 uniform vec3 Color;
 uniform mat4 ModelMatrix;
-uniform mat4 ViewMatrix;
-uniform mat4 ProjectionMatrix;
+//uniform mat4 ViewMatrix;
+//uniform mat4 ProjectionMatrix;
+
+uniform Camera {
+	mat4 ViewMatrix;
+	mat4 ProjectionMatrix;
+};
 
 void main(void)
 {

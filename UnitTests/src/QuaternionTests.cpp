@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "vec.h"
+#include "mat.h"
 #include "qtrn.h"
 #include "MatFactory.h"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -38,7 +40,7 @@ namespace UnitTests
 
 			vec4 ve = vec4(0.0f, 0.0f, -7.0f, 1.0f);
 
-			mat4 m = MatFactory::createMat4FromQuaternion(q);
+			mat4 m = MatFactory::Mat4FromQuaternion(q);
 
 			vec4 vf = m * vi;
 			vf.clean();

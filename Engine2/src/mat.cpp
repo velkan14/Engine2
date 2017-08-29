@@ -1,5 +1,7 @@
 #include "mat.h"
 
+#include "vec.h"
+
 namespace Engine2 {
 	/*-----------  MAT2 ------------*/
 

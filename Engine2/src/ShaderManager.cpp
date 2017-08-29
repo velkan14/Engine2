@@ -1,5 +1,11 @@
 #include "ShaderManager.h"
 
+#include <fstream>
+#include <iostream>
+
+#include "Constant.h"
+#include "ErrorManager.h"
+
 using namespace Engine2;
 
 ShaderManager::ShaderManager() {

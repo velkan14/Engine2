@@ -1,27 +1,34 @@
 #include "MatFactory.h"
 
+#include <vector>
+
+#include "vec.h"
+#include "mat.h"
+#include "qtrn.h"
+
+
 namespace Engine2 {
 	
-		const mat3 MatFactory::createZeroMat3() {
+		const mat3 MatFactory::ZeroMat3() {
 			return mat3();
 		}
-		const mat3 MatFactory::createIdentityMat3() {
+		const mat3 MatFactory::IdentityMat3() {
 			return mat3(
 				1.0f, 0.0f, 0.0f,
 				0.0f, 1.0f, 0.0f,
 				0.0f, 0.0f, 1.0f);
 		}
-		const mat3 MatFactory::createDualMat3(const vec3 & v) {
+		const mat3 MatFactory::DualMat3(const vec3 & v) {
 			return mat3(
 				0.0f, -v.z, v.y,
 				v.z, 0.0f, -v.x,
 				-v.y, v.x, 0.0f);
 		}
 
-		const mat4 MatFactory::createZeroMat4() {
+		const mat4 MatFactory::ZeroMat4() {
 			return mat4();
 		}
-		const mat4 MatFactory::createIdentityMat4()
+		const mat4 MatFactory::IdentityMat4()
 		{
 			return mat4(
 				1.0f, 0.0f, 0.0f, 0.0f,
@@ -30,7 +37,7 @@ namespace Engine2 {
 				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		const mat4 MatFactory::createMat4FromMat3(const mat3 & m)
+		const mat4 MatFactory::Mat4FromMat3(const mat3 & m)
 		{
 			return mat4(
 				m.data[0], m.data[1], m.data[2], 0.0f,
@@ -39,7 +46,7 @@ namespace Engine2 {
 				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		const mat3 MatFactory::createMat3FromMat4(const mat4 & m)
+		const mat3 MatFactory::Mat3FromMat4(const mat4 & m)
 		{
 			return mat3(
 				m.data[0], m.data[1], m.data[2],
@@ -48,18 +55,40 @@ namespace Engine2 {
 		}
 
 
-		GLfloat * MatFactory::createGLMatrixFromMat4(const mat4 & m)
+		GLfloat * MatFactory::GLMatrixFromMat4(const mat4 & m)
 		{
-			GLfloat * matrix = new GLfloat[16];
+			/*std::vector<float> matrix(16);
 
 			for (int i = 0; i < 16; i++) 
 			{
 				matrix[i] = m.data[i];
 			}
+			return &matrix[0];*/
+
+			GLfloat * matrix = new GLfloat[16];
+
+			for (int i = 0; i < 16; i++)
+			{
+				matrix[i] = m.data[i];
+			}
 			return matrix;
+			//FIXME: Memory leak.
 		}
 
-		const mat4 MatFactory::createScaleMat4(const float x, const float y, const float z)
+		GLfloat * MatFactory::GLMatrixFromMat3(const mat3 & m)
+		{
+
+			GLfloat * matrix = new GLfloat[9];
+
+			for (int i = 0; i < 9; i++)
+			{
+				matrix[i] = m.data[i];
+			}
+			return matrix;
+			//FIXME: Memory leak.
+		}
+
+		const mat4 MatFactory::ScaleMat4(const float x, const float y, const float z)
 		{
 			return mat4(
 				x, 0.0f, 0.0f, 0.0f,
@@ -68,28 +97,28 @@ namespace Engine2 {
 				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		const mat4 MatFactory::createScaleMat4(const vec3 & v)
+		const mat4 MatFactory::ScaleMat4(const vec3 & v)
 		{
-			return createScaleMat4(v.x, v.y, v.z);
+			return ScaleMat4(v.x, v.y, v.z);
 		}
 
-		const mat4 MatFactory::createRotationMat4(const vec3 & axis, const float angle)
+		const mat4 MatFactory::RotationMat4(const vec3 & axis, const float angle)
 		{
 			//Provavelmente o axis tem que ser unitario...
 			vec3 a = axis.normalize();
-			mat3 dualMatrix = MatFactory::createDualMat3(a);
+			mat3 dualMatrix = MatFactory::DualMat3(a);
 
-			mat3 m3 =  createIdentityMat3() + sin(angle) * dualMatrix + (1 - cos(angle)) * dualMatrix * dualMatrix;
+			mat3 m3 =  IdentityMat3() + sin(angle) * dualMatrix + (1 - cos(angle)) * dualMatrix * dualMatrix;
 
-			return createMat4FromMat3(m3);
+			return Mat4FromMat3(m3);
 		}
 
-		const mat4 MatFactory::createTranslationMat4(const vec3 & v)
+		const mat4 MatFactory::TranslationMat4(const vec3 & v)
 		{
-			return createTranslationMat4(v.x, v.y, v.z);
+			return TranslationMat4(v.x, v.y, v.z);
 		}
 	
-		const mat4 MatFactory::createTranslationMat4(const float x, const float y, const float z)
+		const mat4 MatFactory::TranslationMat4(const float x, const float y, const float z)
 		{
 			return mat4(
 				1.0f, 0.0f, 0.0f, x,
@@ -98,7 +127,7 @@ namespace Engine2 {
 				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		const mat4 MatFactory::createViewMatrix(const vec3 eye, const vec3 center, const vec3 up)
+		const mat4 MatFactory::ViewMatrix(const vec3 eye, const vec3 center, const vec3 up)
 		{
 			vec3 view = center - eye;
 			vec3 v = view	* (1.0f / view.norm());
@@ -115,16 +144,16 @@ namespace Engine2 {
 				0.0f, 0.0f, 0.0f, 1.0f));
 		}
 
-		const mat4 MatFactory::createOrthographicProjectionMatrix(const float left, const float right, const float bottom, const float top, const float near, const float far)
+		const mat4 MatFactory::OrthographicProjectionMatrix(const float left, const float right, const float bottom, const float top, const float nnear, const float ffar)
 		{
 			return transpose(mat4(
 				2.0f / (right - left), 0.0f, 0.0f, (left + right) / (left - right),
 				0.0f, 2.0f / (top - bottom), 0.0f, (bottom + top) / (bottom - top),
-				0.0f, 0.0f, -2.0f / (far - near), (near + far) / (near - far),
+				0.0f, 0.0f, -2.0f / (ffar - nnear), (nnear + ffar) / (nnear - ffar),
 				0.0f, 0.0f, 0.0f, 1.0f));
 		}
 
-		const mat4 MatFactory::createPerspectiveProjectionMatrix(const float fovy, const float aspect, const float nearZ, const float farZ)
+		const mat4 MatFactory::PerspectiveProjectionMatrix(const float fovy, const float aspect, const float nearZ, const float farZ)
 		{
 			float teta = fovy / 2;
 			float d = 1.0f / tan(teta);
@@ -136,7 +165,7 @@ namespace Engine2 {
 				0.0f, 0.0f, -1.0f, 0.0f));
 		}
 
-		const mat4 MatFactory::createMat4FromQuaternion(const qtrn & q)
+		const mat4 MatFactory::Mat4FromQuaternion(const qtrn & q)
 		{
 			qtrn qn = q.normalize();
 
@@ -159,7 +188,7 @@ namespace Engine2 {
 			return m;
 		}
 
-		const qtrn MatFactory::createQuaternionFromMat4(const mat4 & m)
+		const qtrn MatFactory::QuaternionFromMat4(const mat4 & m)
 		{
 			qtrn q = qtrn();
 			q.t = sqrt(1.0f + m.data[0] + m.data[5] + m.data[10]) / 2.0f;

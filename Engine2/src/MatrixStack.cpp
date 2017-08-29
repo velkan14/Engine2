@@ -1,11 +1,16 @@
 #include "MatrixStack.h"
 
+#include "vec.h"
+#include "mat.h"
+#include "qtrn.h"
+#include "MatFactory.h"
+
 namespace Engine2
 {
 	void MatrixStack::loadIdentity() 
 	{
 		stack.clear();
-		stack.push_back(MatFactory::createIdentityMat4());
+		stack.push_back(MatFactory::IdentityMat4());
 	}
 	void MatrixStack::pushMatrix() 
 	{
@@ -24,7 +29,7 @@ namespace Engine2
 	}
 	void MatrixStack::translate(const float x, const float y, const float z)
 	{
-		mat4 m =  stack.back() * MatFactory::createTranslationMat4(x, y, z);
+		mat4 m =  stack.back() * MatFactory::TranslationMat4(x, y, z);
 		stack.pop_back();
 		stack.push_back(m);
 	}
@@ -34,7 +39,7 @@ namespace Engine2
 	}
 	void MatrixStack::scale(const float x, const float y, const float z)
 	{
-		mat4 m = stack.back() * MatFactory::createScaleMat4(x, y, z);
+		mat4 m = stack.back() * MatFactory::ScaleMat4(x, y, z);
 		stack.pop_back();
 		stack.push_back(m);
 	}
@@ -54,7 +59,7 @@ namespace Engine2
 	}
 	void MatrixStack::rotate(qtrn q)
 	{
-		mat4 m = stack.back() * MatFactory::createMat4FromQuaternion(q);
+		mat4 m = stack.back() * MatFactory::Mat4FromQuaternion(q);
 		stack.pop_back();
 		stack.push_back(m);
 	}

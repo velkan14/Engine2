@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "vec.h"
 #include "mat.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

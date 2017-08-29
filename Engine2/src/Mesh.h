@@ -2,28 +2,33 @@
 #ifndef MESH
 #define MESH
 
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
 #include <vector>
 
-#include "GL/glew.h"
-#include "GL/freeglut.h"
-
-#include "MatFactory.h"
-#include "ErrorManager.h"
-#include "MatrixStack.h"
-#include "ShaderManager.h"
-#include "Constant.h"
+#include "GL\glew.h"
+#include "GL\freeglut.h"
 
 namespace Engine2
 {
+	struct vec2;
+	struct vec3;
+	struct mat4;
+	class MatrixStack;
+	class ShaderProgram;
+
+	enum AttribType {
+		VERTICES,
+		TEXCOORDS,
+		NORMALS,
+		TANGENT,
+		BITANGENT
+	};
+
 	class Mesh
 	{
 
 	private:
+		
+		bool TexcoordsLoaded, NormalsLoaded;
 
 		std::vector <vec2> Texcoords, texcoordData;
 		std::vector <vec3> Vertices, vertexData, Normals, normalData;
@@ -32,9 +37,6 @@ namespace Engine2
 		GLuint VboVertices, VboTexcoords, VboNormals;
 
 		MatrixStack * _matrixStack;
-		ShaderManager * _shaderManager;
-
-		bool TexcoordsLoaded, NormalsLoaded;		
 
 		void parseVertex(std::stringstream & sin);
 		void parseTexcoord(std::stringstream & sin);
@@ -42,7 +44,7 @@ namespace Engine2
 		void parseFace(std::stringstream & sin);
 		void parseLine(std::stringstream & sin);
 
-		void loadMeshData(std::string & filename);
+		void loadMeshData(const std::string & filename);
 		void processMeshData();
 
 		void freeMeshData();
@@ -51,12 +53,13 @@ namespace Engine2
 	public:
 		
 		GLuint VaoId;
-		Mesh(ShaderManager * shaderManager, MatrixStack * matrixStack);
-		const void createMesh(std::string & filename);
+		Mesh(const std::string& filename);
+		~Mesh();
+		const void create();
 		void createBufferObjects();
 		void destroyBufferObjects();
-		void draw(const float r, const float g, const float b);
-		~Mesh();
+		void draw(ShaderProgram * shader, mat4 transform, const float r, const float g, const float b);
+		void draw(ShaderProgram * shader, mat4 transform);
 	};
 	
 

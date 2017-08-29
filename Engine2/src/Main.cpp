@@ -3,17 +3,37 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <assert.h>
 
 #include "GL/glew.h"
 #include "GL/freeglut.h"
 
-#include "MatFactory.h"
-#include "shaderManager.h"
+#include "vec.h"
+#include "mat.h"
+#include "qtrn.h"
+
 #include "CameraManager.h"
+#include "MatFactory.h"
+#include "ErrorManager.h"
+#include "shaderManager.h"
+#include "Camera.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
+#include "Constant.h"
+#include "ShaderProgram.h"
+#include "ShaderProgramManager.h"
+#include "SceneGraphManager.h"
+#include "MeshManager.h"
+#include "SceneNode.h"
+#include "SceneGraph.h"
+#include "Material.h"
+#include "MaterialManager.h"
+#include "DirectionalLight.h"
+
 
 #define CAPTION "Tangram 2D"
+#define ASSERT_GL_ERROR(string) ErrorManager::checkOpenGLError(string)
+
 
 using namespace Engine2;
 
@@ -21,6 +41,8 @@ using namespace Engine2;
 int WinX = 640, WinY = 480;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
+
+GLuint UBO_BP = 0, UBO_BP1 = 1;
 
 int lastTime = 0, elapsedTime = 0;
 
@@ -30,9 +52,8 @@ ShaderManager * shaderManager = new ShaderManager();
 CameraManager * cameraManager = new CameraManager();
 MatrixStack * ModelMatrixStack = new MatrixStack();
 
-Mesh meshTriangle(shaderManager, ModelMatrixStack),
-	 meshCube(shaderManager, ModelMatrixStack), 
-	 meshParalelogram(shaderManager, ModelMatrixStack);
+//Mesh meshTriangle, meshCube, meshParalelogram;
+SceneNode * triangleBig1, *triangleBig2, *triangleMedium, *triangleSmall1, *triangleSmall2, *paralelogram, *square, * positionNode;
 
 const vec3 X_AXIS(1.0f, 0.0f, 0.0f);
 const vec3 Y_AXIS(0.0f, 1.0f, 0.0f);
@@ -51,35 +72,34 @@ vec3 initialPositionTriangleBig1(0.0f, 0.0f, 0.0f);
 vec3 initialPositionTriangleBig2(0.0f, 0.0f, 0.0f);
 vec3 initialPositionTriangleMedium(0.5f, -0.5f, 0.0f);
 vec3 initialPositionTriangleSmall1(0.0f, 0.0f, 0.0f);
-vec3 initialPositionTriangleSmall2(3.51f* M_UNITE, 3.51f* M_UNITE, 0.0f);
-vec3 initialPositionParalelogram(0.0f, -7.0f * M_UNITE, 0.0f);
+vec3 initialPositionTriangleSmall2(0.25f, 0.25f, 0.0f);
+vec3 initialPositionParalelogram(0.0f, -0.25f, 0.0f);
 vec3 initialPositionSquare(0.0f, 0.0f, 0.0f);
 
 vec3 secondPositionTriangleBig1(0.0f, 0.0f, 0.0f);
 vec3 secondPositionTriangleBig2(0.0f, 0.0f, 0.2f);
 vec3 secondPositionTriangleMedium(0.5f, -0.5f, 0.4f);
 vec3 secondPositionTriangleSmall1(0.0f, 0.0f, 0.6f);
-vec3 secondPositionTriangleSmall2(3.51f* M_UNITE, 3.51f* M_UNITE, 0.8f);
-vec3 secondPositionParalelogram(0.0f, -8.0f * M_UNITE, 1.0f);
+vec3 secondPositionTriangleSmall2(0.25f, 0.25f, 0.8f);
+vec3 secondPositionParalelogram(0.0f, -0.25f, 2.2f);
 vec3 secondPositionSquare(0.0f, 0.0f, 1.2f);
 
 
+vec3 thirdPositionTriangleBig1(0.0f, 0.5f, 0.0f);
+vec3 thirdPositionTriangleBig2(0.5f, 0.0f, 0.2f);
+vec3 thirdPositionTriangleMedium(-0.3475f, 1.205f, 0.4f);
+vec3 thirdPositionTriangleSmall1(-0.7f, 0.5f, 0.6f);
+vec3 thirdPositionTriangleSmall2(0.0f, -0.65f, 0.8f);
+vec3 thirdPositionParalelogram(0.33325f, 0.23325f, 2.2f);
+vec3 thirdPositionSquare(-0.35f, 0.5f, 1.2f);
 
-vec3 thirdPositionTriangleBig1(2.0f * M_UNITE, 3.0f * M_UNITE, 0.0f);
-vec3 thirdPositionTriangleBig2(9.0f* M_UNITE, -4.05f* M_UNITE, 0.2f);
-vec3 thirdPositionTriangleMedium(-3.0f* M_UNITE, 13.0f* M_UNITE, 0.4f);
-vec3 thirdPositionTriangleSmall1(-8.0f* M_UNITE, 3.0f* M_UNITE, 0.6f);
-vec3 thirdPositionTriangleSmall2(2.0f* M_UNITE, -13.0f* M_UNITE, 0.8f);
-vec3 thirdPositionParalelogram(5.5f* M_UNITE, -9.0f* M_UNITE, 1.0f);
-vec3 thirdPositionSquare(-3.0f* M_UNITE, 3.0f* M_UNITE, 1.2f);
-
-vec3 finalPositionSquare(-3.0f* M_UNITE, 3.0f* M_UNITE, 0.0f);
-vec3 finalPositionParalelogram(11.4f* M_UNITE, -10.7f* M_UNITE, 0.0f);
-vec3 finalPositionTriangleBig1(2.0f * M_UNITE, 3.0f * M_UNITE, 0.0f);
-vec3 finalPositionTriangleBig2(9.0f* M_UNITE, -4.05f* M_UNITE, 0.0f);
-vec3 finalPositionTriangleMedium(-3.0f* M_UNITE, 13.0f* M_UNITE, 0.0f);
-vec3 finalPositionTriangleSmall1(-8.0f* M_UNITE, 3.0f* M_UNITE, 0.0f);
-vec3 finalPositionTriangleSmall2(2.0f* M_UNITE, -13.0f* M_UNITE, 0.0f);
+vec3 finalPositionTriangleBig1(0.0f, 0.5f, 0.0f);
+vec3 finalPositionTriangleBig2(0.5f, 0.0f, 0.0f);
+vec3 finalPositionTriangleMedium(-0.3475f, 1.205f, 0.0f);
+vec3 finalPositionTriangleSmall1(-0.7f, 0.5f, 0.0f);
+vec3 finalPositionTriangleSmall2(0.0f, -0.65f, 0.0f);
+vec3 finalPositionParalelogram(0.33325f, 0.23325f, 0.0f);
+vec3 finalPositionSquare(-0.35f, 0.5f, 0.0f);
 
 qtrn initialRotationTriangleBig1(Z_AXIS, -M_PI / 4.0f);
 qtrn initialRotationTriangleBig2(Z_AXIS, -(3.0f / 4.0f) * M_PI);
@@ -115,7 +135,7 @@ qtrn currentRotationSquare(Z_AXIS, M_PI / 4.0f);
 
 /////////////////////////////////////////////////////////////////////// VAOs & VBOs
 
-void createBufferObjects()
+/*void createBufferObjects()
 {
 	meshCube.createBufferObjects();
 	meshParalelogram.createBufferObjects();
@@ -131,12 +151,13 @@ void destroyBufferObjects()
 	meshParalelogram.destroyBufferObjects();
 
 	ErrorManager::checkOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
-}
+}*/
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
 void drawTangram()
 {
+	/*
 	//Big Triangle 1
 	ModelMatrixStack->pushMatrix();
 	ModelMatrixStack->translate(currentPositionTriangleBig1);
@@ -192,12 +213,15 @@ void drawTangram()
 	ModelMatrixStack->scale(1.0f / (2.0f * M_SQRT2), 1.0f / (2.0f * M_SQRT2), 0.2f);
 	meshCube.draw(VALUE_90, 0.0f,VALUE_90);
 	ModelMatrixStack->popMatrix();
+	*/
 }
 void drawScene()
 {
 	cameraManager->computeMatrix();
 
-	ModelMatrixStack->loadIdentity();
+	SceneGraphManager::instance()->get("main")->draw();
+
+	/*ModelMatrixStack->loadIdentity();
 
 	ModelMatrixStack->pushMatrix();
 	ModelMatrixStack->translate(Position);
@@ -208,7 +232,7 @@ void drawScene()
 		meshCube.draw(VALUE_100, VALUE_90, VALUE_80);
 		ModelMatrixStack->popMatrix();
 		drawTangram();
-	ModelMatrixStack->popMatrix();
+	ModelMatrixStack->popMatrix();*/
 
 }
 
@@ -281,6 +305,15 @@ void update()
 	updateAnimation();
 
 	cameraManager->update();
+
+	triangleBig1->setMatrix(MatFactory::TranslationMat4(currentPositionTriangleBig1) * MatFactory::Mat4FromQuaternion(currentRotationTriangleBig1) * MatFactory::ScaleMat4(1.0f, 1.0f, 0.2));
+	triangleBig2->setMatrix(MatFactory::TranslationMat4(currentPositionTriangleBig2) * MatFactory::Mat4FromQuaternion(currentRotationTriangleBig2)  *  MatFactory::ScaleMat4(1.0f, 1.0f, 0.2));
+	triangleMedium->setMatrix(MatFactory::TranslationMat4(currentPositionTriangleMedium) * MatFactory::Mat4FromQuaternion(currentRotationTriangleMedium)* MatFactory::ScaleMat4(1.0f / M_SQRT2, 1.0f / M_SQRT2, 0.2f));
+	triangleSmall1->setMatrix(MatFactory::TranslationMat4(currentPositionTriangleSmall1)* MatFactory::Mat4FromQuaternion(currentRotationTriangleSmall1) * MatFactory::ScaleMat4(1.0f / 2.0f, 1.0f / 2.0f, 0.2f));
+	triangleSmall2->setMatrix(MatFactory::TranslationMat4(currentPositionTriangleSmall2)* MatFactory::Mat4FromQuaternion(currentRotationTriangleSmall2) * MatFactory::ScaleMat4(1.0f / 2.0f, 1.0f / 2.0f, 0.2f) );
+	paralelogram->setMatrix( MatFactory::Mat4FromQuaternion(currentRotationParalelogram)* MatFactory::ScaleMat4(2.0f, 2.0f, 0.4f) * MatFactory::TranslationMat4(currentPositionParalelogram));
+	square->setMatrix(MatFactory::TranslationMat4(currentPositionSquare) * MatFactory::Mat4FromQuaternion(currentRotationSquare)* MatFactory::ScaleMat4(1.0f / (2.0f * M_SQRT2), 1.0f / (2.0f * M_SQRT2), 0.2f) );
+	positionNode->setMatrix(MatFactory::TranslationMat4(Position));
 }
 
 /////////////////////////////////////////////////////////////////////// CALLBACKS
@@ -288,7 +321,7 @@ void update()
 void cleanup()
 {
 	shaderManager->destroyShaderProgram();
-	destroyBufferObjects();
+	//destroyBufferObjects();
 }
 
 void display()
@@ -468,7 +501,152 @@ void setupGLUT(int argc, char* argv[])
 		std::cerr << "ERROR: Could not create a new rendering window." << std::endl;
 		exit(EXIT_FAILURE);
 	}
+}
 
+void createMeshes()
+{
+	Mesh* mesh;
+	mesh = new Mesh("models/triangle.obj");
+	mesh->create();
+	MeshManager::instance()->add("triangle", mesh);
+
+	mesh = new Mesh("models/cube.obj");
+	mesh->create();
+	MeshManager::instance()->add("cube", mesh);
+
+	mesh = new Mesh("models/paralelogram.obj");
+	mesh->create();
+	MeshManager::instance()->add("paralelogram", mesh);
+}
+
+void createMaterials() 
+{
+	Material* material;
+	material = new Material("models/GreenGlossy.mtl");
+	MaterialManager::instance()->add(material->MaterialName(), material);
+
+	material = new Material("models/OrangeDiffuse.mtl");
+	MaterialManager::instance()->add(material->MaterialName(), material);
+}
+
+void createTextures()
+{
+	//Nothing for now
+}
+
+void createShaderPrograms()
+{
+	ShaderProgram* program;
+	// Main simple shader
+	program = new ShaderProgram();
+	program->addShader(GL_VERTEX_SHADER, "shader/BaseShader_vs.glsl");
+	program->addShader(GL_FRAGMENT_SHADER, "shader/BaseShader_fs.glsl");
+	program->addAttribute("inPosition", VERTICES);
+	program->addAttribute("inTexcoord", TEXCOORDS);
+	program->addAttribute("inNormal", NORMALS);
+	program->create();
+	program->addUniform("ModelMatrix");
+	program->addUniform("NormalMatrix");
+	program->addUniform("DiffuseReflectivity");
+	program->addUniform("SpecularReflectivity");
+	program->addUniform("SpecularExponent");
+	program->addUniform("Texmap");
+	program->addUniform("TexMode");
+	program->addUniformBlock("Camera", UBO_BP);
+	program->addUniformBlock("DirectionalLight", UBO_BP1);
+	ShaderProgramManager::instance()->add("Basic", program);
+
+	/*ShaderProgram* program;
+	// Main simple shader
+	program = new ShaderProgram();
+	program->addShader(GL_VERTEX_SHADER, "shader/BasicShader.vert");
+	program->addShader(GL_FRAGMENT_SHADER, "shader/BasicShader.frag");
+	program->addAttribute("inPosition", VERTICES);
+	program->addAttribute("inTexcoord", TEXCOORDS);
+	program->addAttribute("inNormal", NORMALS);
+	program->create();
+	program->addUniform("Color");
+	program->addUniform("ModelMatrix");
+	//program->addUniform("ViewMatrix");
+	//program->addUniform("ProjectionMatrix");
+	program->addUniformBlock("Camera", UBO_BP);
+	ShaderProgramManager::instance()->add("Basic", program);*/
+
+	ErrorManager::checkOpenGLError("ShaderCreation");
+}
+
+
+void createEnvironmentSceneGraph(SceneGraph * scenegraph) {
+	Mesh* mesh;
+	Material * mat = MaterialManager::instance()->get("GreenGlossy");
+
+	// Ground
+	mesh = MeshManager::instance()->get("cube");
+
+	positionNode = scenegraph->createNode();
+	SceneNode *ground = positionNode->createNode();
+	ground->setMesh(mesh);
+	ground->setMaterial(mat);
+	ground->setMatrix(MatFactory::TranslationMat4(0.0f, 0.0f, -0.2f) * MatFactory::ScaleMat4(5.0f, 5.0f, 0.1f) * MatFactory::TranslationMat4(-0.5f, -0.5f, 0.5f));
+
+	mesh = MeshManager::instance()->get("triangle");
+
+	//Big Triangle 1
+	triangleBig1 = positionNode->createNode();
+	triangleBig1->setMesh(mesh);
+	triangleBig1->setMaterial(mat);
+
+	//Big Triangle 2
+	triangleBig2 = positionNode->createNode();
+	triangleBig2->setMesh(mesh);
+	triangleBig2->setMaterial(mat);
+
+	//Medium Triangle
+	triangleMedium = positionNode->createNode();
+	triangleMedium->setMesh(mesh);
+	triangleMedium->setMaterial(mat);
+
+	//Small Triangle 1
+	triangleSmall1 = positionNode->createNode();
+	triangleSmall1->setMesh(mesh);
+	triangleSmall1->setMaterial(mat);
+
+	//Small Triangle 2
+	triangleSmall2 = positionNode->createNode();
+	triangleSmall2->setMesh(mesh);
+	triangleSmall2->setMaterial(mat);
+
+	mat = MaterialManager::instance()->get("OrangeDiffuse");
+
+	//Paralelogram
+	mesh = MeshManager::instance()->get("paralelogram");
+	paralelogram = positionNode->createNode();
+	paralelogram->setMesh(mesh);
+	paralelogram->setMaterial(mat);
+
+	//Square
+	mesh = MeshManager::instance()->get("cube");
+	square = positionNode->createNode();
+	square->setMesh(mesh);
+	square->setMaterial(mat);
+}
+
+void createScene()
+{
+	cameraManager->init(UBO_BP);
+
+	SceneGraph* scenegraph = new SceneGraph();
+	scenegraph->setCamera(cameraManager->getCamera());
+	scenegraph->setLight(new DirectionalLight(&vec3(1.0f, 0.6f, 0.25f), &vec3(0.0f, 0.0f, 0.0f), UBO_BP1));
+
+	cameraManager->computeMatrix();
+
+	SceneNode* groundRoot = scenegraph->getRoot();
+	groundRoot->setShaderProgram(ShaderProgramManager::instance()->get("Basic"));
+
+	createEnvironmentSceneGraph(scenegraph);
+
+	SceneGraphManager::instance()->add("main", scenegraph);
 }
 
 void init(int argc, char* argv[])
@@ -476,16 +654,26 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
-
-	meshTriangle.createMesh(std::string("models/triangle.obj"));
-	meshCube.createMesh(std::string("models/cube.obj"));
-	meshParalelogram.createMesh(std::string("models/paralelogram.obj"));
-	shaderManager->createShaderProgram(std::string("shader/BasicShader.vert"), 
-									std::string("shader/BasicShader.frag"));
-	createBufferObjects();
-	cameraManager->init(shaderManager, meshCube.VaoId);
-
 	setupCallbacks();
+
+	ASSERT_GL_ERROR("ERROR: General setup.");
+	createMeshes();
+	ASSERT_GL_ERROR("ERROR: Mesh creation.");
+	createMaterials();
+	ASSERT_GL_ERROR("ERROR: Material loading.");
+	createTextures();
+	ASSERT_GL_ERROR("ERROR: Texture loading.");
+	createShaderPrograms();
+	ASSERT_GL_ERROR("ERROR: Shader creation.");
+	createScene();
+	ASSERT_GL_ERROR("ERROR: Scene creation.");
+
+	/*meshTriangle.create(std::string("models/triangle.obj"));
+	meshCube.create(std::string("models/cube.obj"));
+	meshParalelogram.create(std::string("models/paralelogram.obj"));
+	shaderManager->createShaderProgram(std::string("shader/BasicShader.vert"), 
+									std::string("shader/BasicShader.frag"));*/
+	//createBufferObjects();	
 }
 
 int main(int argc, char* argv[])

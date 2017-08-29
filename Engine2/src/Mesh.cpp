@@ -1,17 +1,30 @@
 #include "Mesh.h"
 
+#include <fstream>
+
+#include "vec.h"
+#include "mat.h"
+#include "Constant.h"
+#include "ErrorManager.h"
+#include "MatFactory.h"
+#include "MatrixStack.h"
+#include "ShaderProgram.h"
+
 namespace Engine2
 {
-	Mesh::Mesh(ShaderManager * shaderManager, MatrixStack * matrixStack)
+	Mesh::Mesh(const std::string& filename)
 	{
 		TexcoordsLoaded = false;
 		NormalsLoaded = false;
-		_matrixStack = matrixStack;
-		_shaderManager = shaderManager;
+
+		loadMeshData(filename);
 	}
 
 	Mesh::~Mesh()
 	{
+		Vertices.clear();
+		Texcoords.clear();
+		Normals.clear();
 	}
 
 	void Mesh::parseVertex(std::stringstream& sin)
@@ -58,7 +71,7 @@ namespace Engine2
 		else if (s.compare("f") == 0) parseFace(sin);
 	}
 
-	void Mesh::loadMeshData(std::string& filename)
+	void Mesh::loadMeshData(const std::string& filename)
 	{
 		std::ifstream ifile(filename);
 		while (ifile.good()) {
@@ -99,11 +112,11 @@ namespace Engine2
 		normalIdx.clear();
 	}
 
-	const void Mesh::createMesh(std::string& filename)
+	const void Mesh::create()
 	{
-		loadMeshData(filename);
 		processMeshData();
 		freeMeshData();
+		createBufferObjects();
 	}
 
 	void Mesh::createBufferObjects()
@@ -152,22 +165,38 @@ namespace Engine2
 
 	}
 
-	void Mesh::draw(const float r, const float g, const float b)
+	//FIXME: REMOVE
+	void Mesh::draw(ShaderProgram * shader, mat4 transform, const float r, const float g, const float b)
 	{
 		glBindVertexArray(VaoId);
-		glUseProgram(_shaderManager->getProgramId());
 
 		GLfloat v[3] = { r, g, b };
-		glUniform3fv(_shaderManager->getColorId(), 1, &v[0]);
+		glUniform3fv(shader->getUniform("Color"), 1, &v[0]);
 
-		GLfloat * m = MatFactory::createGLMatrixFromMat4(_matrixStack->getCurrentMatrix());
-		glUniformMatrix4fv(_shaderManager->getModelMatrixId(), 1, GL_TRUE, m);
+		GLfloat * m = MatFactory::GLMatrixFromMat4(_matrixStack->getCurrentMatrix());
+		glUniformMatrix4fv(shader->getUniform("ModelMatrix"), 1, GL_TRUE, m);
 		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)Vertices.size());
 		delete m;
 		glUseProgram(0);
 		glBindVertexArray(0);
 
 		ErrorManager::checkOpenGLError("ERROR: Could not draw scene.");
+	}
+
+	void Mesh::draw(ShaderProgram * shader, mat4 transform)
+	{
+		glBindVertexArray(VaoId);
+
+		/*GLfloat v[3] = { 0.5, 0.5, 0.5 };
+		glUniform3fv(shader->getUniform("Color"), 1, &v[0]); //FIXME*/
+
+		GLint ModelMatrix_UId = shader->getUniform("ModelMatrix");
+
+		GLfloat * m = MatFactory::GLMatrixFromMat4(transform);
+		glUniformMatrix4fv(ModelMatrix_UId, 1, GL_TRUE, m);
+
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)Vertices.size());
+		glBindVertexArray(0);
 	}
 
 }

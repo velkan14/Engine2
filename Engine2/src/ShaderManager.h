@@ -4,15 +4,9 @@
 #define SHADER_MANAGER
 
 #include <string>
-#include <fstream>
-#include <streambuf>
-#include <sstream> 
 
-#include "GL/glew.h"
-#include "GL/freeglut.h"
-
-#include "ErrorManager.h"
-#include "Constant.h"
+#include "GL\glew.h"
+#include "GL\freeglut.h"
 
 namespace Engine2
 {
@@ -41,5 +35,6 @@ namespace Engine2
 		GLint getProjectionMatrixId();
 		GLint getColorId();
 	};
+
 }
 #endif

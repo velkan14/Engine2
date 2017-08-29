@@ -4,9 +4,13 @@
 #define MAT
 
 #include <iostream>
-#include "vec.h"
+#include <sstream>
 
 namespace Engine2 {
+
+	struct vec2; 
+	struct vec3;
+	struct vec4;
 
 	struct mat2{
 		float data[4];

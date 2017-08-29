@@ -1,5 +1,10 @@
 #include "ErrorManager.h"
 
+#include <iostream>
+#include <string>
+#include "GL\glew.h"
+#include "GL\freeglut.h"
+
 using namespace Engine2;
 
 bool ErrorManager::isOpenGLError() {

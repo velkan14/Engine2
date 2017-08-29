@@ -1,11 +1,15 @@
 #pragma once
 #ifndef MATRIX_STACK
 #define MATRIX_STACK
+
 #include <vector>
-#include "MatFactory.h"
 
 namespace Engine2
 {
+	struct qtrn;
+	struct mat4;
+	struct vec3;
+
 	class MatrixStack
 	{
 		std::vector<mat4> stack;

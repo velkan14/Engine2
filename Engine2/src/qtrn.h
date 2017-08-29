@@ -2,9 +2,12 @@
 #ifndef QUATERNION
 #define QUATERNION
 
-#include "vec.h"
+#include <iostream>
+#include <sstream>
 
 namespace Engine2 {
+	struct vec3;
+	struct vec4;
 
 	struct qtrn{
 		float t, x, y, z;
