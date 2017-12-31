@@ -637,7 +637,7 @@ void createScene()
 
 	SceneGraph* scenegraph = new SceneGraph();
 	scenegraph->setCamera(cameraManager->getCamera());
-	scenegraph->setLight(new DirectionalLight(&vec3(1.0f, 0.6f, 0.25f), &vec3(0.0f, 0.0f, 0.0f), UBO_BP1));
+	scenegraph->setLight(new DirectionalLight(&vec3(1.0f, 0.6f, 0.25f), &vec3(0.5f, 0.5f, 0.0f), UBO_BP1));
 
 	cameraManager->computeMatrix();
 
